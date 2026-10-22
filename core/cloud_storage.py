@@ -1,6 +1,6 @@
 import os
 import shutil
-from typing import BinaryIO, Optional
+from typing import BinaryIO, Optional, Union
 
 
 class CloudStorageAdapter:

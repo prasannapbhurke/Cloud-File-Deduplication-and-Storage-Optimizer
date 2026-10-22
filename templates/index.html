@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloud File Deduplication & Storage Optimizer</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header class="navbar">
+    <div class="nav-brand">
+      <div class="logo-badge">☁️ CC</div>
+      <div>
+        <h1 class="logo-title">Cloud File Deduplication & Storage Optimizer</h1>
+        <p class="logo-sub">D.Y. Patil College of Engineering & Technology, Kolhapur | Batch T6</p>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <span class="status-indicator"><span class="dot pulse"></span> Cloud Engine: Active</span>
+      <button id="btnReset" class="btn btn-outline" title="Reset all stored data">Clear Storage</button>
+      <a href="https://github.com/prasannapbhurke/Cloud-File-Deduplication-and-Storage-Optimizer" target="_blank" class="btn btn-github">
+        GitHub Repo ↗
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container">
+
+    <!-- KPI / Analytics Cards -->
+    <section class="metrics-grid">
+      <div class="metric-card glass-panel">
+        <div class="metric-icon blue-glow">📁</div>
+        <div class="metric-info">
+          <span class="metric-label">Total Files Ingested</span>
+          <h2 id="metricTotalFiles" class="metric-value">0</h2>
+          <span class="metric-note" id="metricDuplicatesCount">0 duplicate files avoided</span>
+        </div>
+      </div>
+
+      <div class="metric-card glass-panel">
+        <div class="metric-icon purple-glow">⚡</div>
+        <div class="metric-info">
+          <span class="metric-label">Deduplication Ratio</span>
+          <h2 id="metricDedupRatio" class="metric-value">1.0 : 1</h2>
+          <span class="metric-note" id="metricSavingsPct">0.0% physical reduction</span>
+        </div>
+      </div>
+
+      <div class="metric-card glass-panel">
+        <div class="metric-icon amber-glow">🗄️</div>
+        <div class="metric-info">
+          <span class="metric-label">Physical Cloud Stored</span>
+          <h2 id="metricPhysicalStored" class="metric-value">0 B</h2>
+          <span class="metric-note" id="metricUniqueChunks">0 unique binary chunks</span>
+        </div>
+      </div>
+
+      <div class="metric-card glass-panel">
+        <div class="metric-icon green-glow">🌱</div>
+        <div class="metric-info">
+          <span class="metric-label">Net Space Saved</span>
+          <h2 id="metricSpaceSaved" class="metric-value highlight-green">0 B</h2>
+          <span class="metric-note" id="metricLogicalTotal">Logical Volume: 0 B</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Storage Comparison Bar -->
+    <section class="glass-panel storage-bar-panel">
+      <div class="storage-bar-header">
+        <div>
+          <h3>Cloud Storage Optimization Efficiency</h3>
+          <p class="section-desc">Comparing virtual user upload volume versus actual physical storage consumed in the cloud.</p>
+        </div>
+        <div class="storage-legend">
+          <span class="legend-item"><span class="legend-box physical-box"></span> Physical Cloud Stored</span>
+          <span class="legend-item"><span class="legend-box saved-box"></span> Redundant Data Saved</span>
+        </div>
+      </div>
+      <div class="progress-track">
+        <div id="storageProgressBar" class="progress-fill" style="width: 0%;"></div>
+      </div>
+      <div class="storage-bar-footer">
+        <span id="labelPhysical">Stored: 0 B</span>
+        <span id="labelSaved" class="text-green">Saved: 0 B</span>
+      </div>
+    </section>
+
+    <!-- Upload and Logs Section -->
+    <div class="dashboard-split">
+      <!-- File Ingestion Card -->
+      <section class="glass-panel upload-panel">
+        <div class="panel-header">
+          <h3>Upload File to Cloud</h3>
+          <span class="badge">Block Deduplication (64 KB Chunks)</span>
+        </div>
+
+        <form id="uploadForm">
+          <div class="form-group">
+            <label for="userName">Uploaded By (Team Member / Client):</label>
+            <select id="userName" class="form-control" required>
+              <option value="Sarthak Salokhe">Sarthak Sanjay Salokhe (Roll 144)</option>
+              <option value="Vyanktesh Madhyapgol">Vyanktesh Harishchandra Madhyapgol (Roll 149)</option>
+              <option value="Manjunath Gavandi">Manjunath Rajkumar Gavandi (Roll 151)</option>
+              <option value="Balaji Gaikwad">Balaji Ramraje Gaikwad (Roll 152)</option>
+              <option value="Prasanna Bhurke" selected>Prasanna Pradeep Bhurke (Roll 155)</option>
+              <option value="External Guest">External Guest User</option>
+            </select>
+          </div>
+
+          <!-- Drag and Drop Zone -->
+          <div id="dropZone" class="drop-zone">
+            <div class="drop-icon">📤</div>
+            <p class="drop-title">Drag & Drop files here, or <span>browse</span></p>
+            <p class="drop-sub">Supported: PDF, DOCX, ZIP, MP4, PNG, JPG, CSV (Any format)</p>
+            <input type="file" id="fileInput" class="file-input" required>
+          </div>
+
+          <div id="filePreview" class="file-preview hidden">
+            <div class="file-preview-info">
+              <span id="previewName" class="file-preview-name">filename.ext</span>
+              <span id="previewSize" class="file-preview-size">0 KB</span>
+            </div>
+            <button type="button" id="btnCancelFile" class="btn-cancel">✕</button>
+          </div>
+
+          <button type="submit" id="btnSubmitUpload" class="btn btn-primary btn-block">
+            <span>Slice Chunks, Hash & Upload</span>
+          </button>
+        </form>
+
+        <div id="uploadFeedback" class="upload-feedback hidden"></div>
+      </section>
+
+      <!-- Live Terminal / Audit Logs -->
+      <section class="glass-panel terminal-panel">
+        <div class="panel-header">
+          <h3>System Event & Hashing Logs</h3>
+          <button id="btnClearLogs" class="btn-text">Clear</button>
+        </div>
+        <div id="terminalBody" class="terminal-body">
+          <div class="log-line log-system">[SYSTEM] Cloud File Deduplication Engine initialized.</div>
+          <div class="log-line log-system">[SYSTEM] S3 Object Bucket: /chunks (64 KB Content-Addressable Blocks).</div>
+          <div class="log-line log-info">[INFO] SHA-256 Stream Hasher ready. Waiting for upload events...</div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Uploaded Files Catalog Table -->
+    <section class="glass-panel files-panel">
+      <div class="panel-header">
+        <div>
+          <h3>Cloud Storage File Catalog</h3>
+          <p class="section-desc">Virtual files mapped to physical content-addressable storage chunks.</p>
+        </div>
+        <button id="btnRefreshFiles" class="btn btn-outline btn-sm">Refresh List</button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>File Name</th>
+              <th>User</th>
+              <th>Size</th>
+              <th>SHA-256 Digest</th>
+              <th>Chunks (Reused / Total)</th>
+              <th>Status</th>
+              <th>Timestamp</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="filesTableBody">
+            <tr>
+              <td colspan="9" class="text-center text-muted">No files uploaded yet. Upload a file above to test deduplication!</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Chunk Inspector Modal -->
+  <div id="chunkModal" class="modal hidden">
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="modal-content glass-panel">
+      <div class="modal-header">
+        <div>
+          <h3 id="modalFileName">Chunk Map Inspector</h3>
+          <p class="modal-sub" id="modalFileHash">SHA-256: ...</p>
+        </div>
+        <button id="modalClose" class="btn-cancel">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-summary-grid">
+          <div class="summary-pill"><span>Total Blocks:</span> <strong id="modalTotalChunks">0</strong></div>
+          <div class="summary-pill highlight-green"><span>Reused Chunks:</span> <strong id="modalDedupChunks">0</strong></div>
+          <div class="summary-pill highlight-blue"><span>New Chunks:</span> <strong id="modalNewChunks">0</strong></div>
+          <div class="summary-pill highlight-purple"><span>Block Size:</span> <strong>64 KB</strong></div>
+        </div>
+        <div class="chunk-map-header">
+          <h4>Visual Block Map (Content-Addressable Storage)</h4>
+          <div class="chunk-legend">
+            <span><span class="legend-dot green"></span> Reused / Deduplicated</span>
+            <span><span class="legend-dot blue"></span> New Physical Block</span>
+          </div>
+        </div>
+        <div id="chunkBlocksGrid" class="chunk-blocks-grid">
+          <!-- Dynamic block cells -->
+        </div>
+        <div class="table-responsive modal-table-wrap">
+          <table class="data-table small-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Chunk SHA-256 Digest</th>
+                <th>Size</th>
+                <th>Ref Count</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="modalChunksTableBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>Cloud File Deduplication and Storage Optimizer | Cloud Computing (CC) Project | D.Y. Patil College of Engineering & Technology, Kolhapur</p>
+  </footer>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

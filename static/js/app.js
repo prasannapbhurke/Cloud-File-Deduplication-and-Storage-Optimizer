@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Fetch and update metrics
   async function updateStats() {
     try {
-      const res = await fetch('/api/stats');
+      const res = await fetch('api/stats');
       const data = await res.json();
 
       metricTotalFiles.textContent = data.total_files;
@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Fetch and populate file list
   async function loadFiles() {
     try {
-      const res = await fetch('/api/files');
+      const res = await fetch('api/files');
       const files = await res.json();
 
       if (files.length === 0) {
@@ -198,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <td style="font-size: 0.8rem; color: var(--text-secondary);">${f.upload_timestamp}</td>
             <td>
               <div class="action-btns">
-                <a href="/api/download/${f.id}" class="btn-action" title="Download Reconstructed File">⬇️</a>
+                <a href="api/download/${f.id}" class="btn-action" title="Download Reconstructed File">⬇️</a>
                 <button onclick="window.inspectChunks(${f.id})" class="btn-action btn-inspect" title="Inspect 64 KB Blocks">🔍 Blocks</button>
                 <button onclick="window.deleteFileItem(${f.id})" class="btn-action btn-danger" title="Delete">🗑️</button>
               </div>
@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.inspectChunks = async (fileId) => {
     try {
       appendLog(`[INSPECT] Fetching block map and chunk hashes for File #${fileId}...`, 'info');
-      const res = await fetch(`/api/file/${fileId}/chunks`);
+      const res = await fetch(`api/file/${fileId}/chunks`);
       if (!res.ok) throw new Error('File not found');
       const data = await res.json();
 
@@ -310,7 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
     appendLog(`[INGEST] Slicing "${selectedFile.name}" (${formatBytes(selectedFile.size)}) into 64 KB blocks...`, 'info');
 
     try {
-      const res = await fetch('/api/upload', {
+      const res = await fetch('api/upload', {
         method: 'POST',
         body: formData
       });
@@ -393,7 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       appendLog(`[DELETE] Requesting removal of file #${fileId}...`, 'info');
-      const res = await fetch(`/api/delete/${fileId}`, { method: 'POST' });
+      const res = await fetch(`api/delete/${fileId}`, { method: 'POST' });
       const data = await res.json();
 
       if (data.success) {
@@ -420,7 +420,7 @@ document.addEventListener('DOMContentLoaded', () => {
   btnReset.addEventListener('click', async () => {
     if (!confirm('This will wipe all metadata and cloud storage chunks. Continue?')) return;
     try {
-      await fetch('/api/reset', { method: 'POST' });
+      await fetch('api/reset', { method: 'POST' });
       appendLog('[RESET] Cloud storage and metadata catalog completely wiped.', 'warn');
       uploadFeedback.classList.add('hidden');
       await updateStats();

@@ -164,7 +164,7 @@ try:
     if is_hf:
         port = int(os.environ.get("PORT", 7860))
         print(f"[*] Starting Gradio & ZeroGPU on port {port} for Hugging Face Spaces...")
-        demo.launch(server_name="0.0.0.0", server_port=port, show_api=False, prevent_thread_lock=False)
+        demo.launch()
 except Exception as err:
     import traceback
     traceback.print_exc()

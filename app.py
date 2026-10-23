@@ -166,8 +166,9 @@ try:
         print(f"[*] Starting Gradio & ZeroGPU on port {port} for Hugging Face Spaces...")
         demo.launch(server_name="0.0.0.0", server_port=port, show_api=False, prevent_thread_lock=False)
 except Exception as err:
-    demo = None
-    print(f"[!] Warning: Gradio/ASGI initialization notice: {err}")
+    import traceback
+    traceback.print_exc()
+    raise err
 
 
 if __name__ == "__main__":

@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  cloud-dedup:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cloud-file-deduplication
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - DATA_DIR=/app/data
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - dedup_storage:/app/data
+
+volumes:
+  dedup_storage:
+    name: dedup_persistent_storage

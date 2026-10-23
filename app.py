@@ -24,13 +24,17 @@ from core.cloud_storage import CloudStorageAdapter
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500 MB upload limit
 
+data_dir = os.environ.get("DATA_DIR", ".")
+os.makedirs(data_dir, exist_ok=True)
+bucket_dir = os.path.join(data_dir, "cloud_storage_bucket")
+db_path = os.path.join(data_dir, "metadata_catalog.db")
+
 # Initialize Cloud Storage & Deduplication Engine
-storage_adapter = CloudStorageAdapter(bucket_dir="cloud_storage_bucket")
-dedup_manager = DeduplicationManager(db_path="metadata_catalog.db", storage_adapter=storage_adapter)
-analytics = StorageAnalytics(db_path="metadata_catalog.db")
+storage_adapter = CloudStorageAdapter(bucket_dir=bucket_dir)
+dedup_manager = DeduplicationManager(db_path=db_path, storage_adapter=storage_adapter)
+analytics = StorageAnalytics(db_path=db_path)
 
-
-is_hf = bool(os.environ.get("SYSTEM") == "spaces" or os.environ.get("SPACE_ID") or os.environ.get("PORT") == "7860")
+is_hf = bool(os.environ.get("SYSTEM") == "spaces" or os.environ.get("SPACE_ID"))
 
 
 @app.route("/")
@@ -132,43 +136,37 @@ def reset_storage():
     return jsonify({"success": True, "message": "Storage reset successfully."})
 
 
-# --- Hugging Face Spaces & ZeroGPU Launcher ---
-try:
-    import gradio as gr
-    from a2wsgi import WSGIMiddleware
+# --- Optional Hugging Face Spaces & ZeroGPU Launcher ---
+if is_hf:
+    try:
+        import gradio as gr
+        from a2wsgi import WSGIMiddleware
 
-    custom_css = """
-    .gradio-container { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
-    footer { display: none !important; }
-    """
+        custom_css = """
+        .gradio-container { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+        footer { display: none !important; }
+        """
 
-    with gr.Blocks(title="Cloud File Deduplication & Storage Optimizer") as demo:
-        with gr.Accordion("⚡ ZeroGPU Optimization Engine", open=False):
-            gpu_input = gr.Textbox(label="Worker Mode", value="active", interactive=False)
-            gpu_status = gr.Textbox(label="ZeroGPU Hardware Status", value="⚡ ZeroGPU Storage Engine Active")
-            btn_gpu = gr.Button("Trigger GPU Hardware Pass")
-            btn_gpu.click(fn=zero_gpu_optimizer, inputs=[gpu_input], outputs=[gpu_status])
+        with gr.Blocks(title="Cloud File Deduplication & Storage Optimizer") as demo:
+            with gr.Accordion("⚡ ZeroGPU Optimization Engine", open=False):
+                gpu_input = gr.Textbox(label="Worker Mode", value="active", interactive=False)
+                gpu_status = gr.Textbox(label="ZeroGPU Hardware Status", value="⚡ ZeroGPU Storage Engine Active")
+                btn_gpu = gr.Button("Trigger GPU Hardware Pass")
+                btn_gpu.click(fn=zero_gpu_optimizer, inputs=[gpu_input], outputs=[gpu_status])
 
-        # Hook startup scanner via load event
-        demo.load(fn=zero_gpu_optimizer, inputs=[gpu_input], outputs=[gpu_status])
+            demo.load(fn=zero_gpu_optimizer, inputs=[gpu_input], outputs=[gpu_status])
 
-        # Embed complete Flask Dashboard into full-screen Gradio view
-        gr.HTML(
-            '<iframe src="/flask/" style="width: 100%; height: 95vh; border: none; overflow: hidden;" allow="fullscreen"></iframe>'
-        )
+            gr.HTML(
+                '<iframe src="/flask/" style="width: 100%; height: 95vh; border: none; overflow: hidden;" allow="fullscreen"></iframe>'
+            )
 
-    # Mount Flask app to Gradio's internal ASGI application
-    demo.app.mount("/flask", WSGIMiddleware(app))
+        demo.app.mount("/flask", WSGIMiddleware(app))
 
-    # If running on Hugging Face Spaces, launch demo immediately and keep process alive
-    if is_hf:
         port = int(os.environ.get("PORT", 7860))
         print(f"[*] Starting Gradio & ZeroGPU on port {port} for Hugging Face Spaces...")
         demo.launch()
-except Exception as err:
-    import traceback
-    traceback.print_exc()
-    raise err
+    except Exception as err:
+        print(f"[!] Warning: Gradio launcher could not be initialized: {err}")
 
 
 if __name__ == "__main__":

@@ -1,27 +1,35 @@
 FROM python:3.10-slim
 
-# Set up non-root user (Hugging Face Spaces UID 1000 requirement)
-RUN useradd -m -u 1000 user
-USER user
-ENV HOME=/home/user \
-    PATH=/home/user/.local/bin:$PATH \
-    PORT=7860 \
-    PYTHONUNBUFFERED=1
+# Prevent Python from writing .pyc and enable unbuffered logging
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PORT=5000 \
+    DATA_DIR=/app/data
 
-WORKDIR $HOME/app
+WORKDIR /app
 
-# Install dependencies
-COPY --chown=user:user requirements.txt .
+# Install system dependencies (curl for healthcheck)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copy project files
-COPY --chown=user:user . .
+# Copy all project files
+COPY . .
 
-# Ensure storage directories exist with proper write permissions
-RUN mkdir -p cloud_storage_bucket/chunks
+# Ensure data directory and chunk storage directory exist
+RUN mkdir -p /app/data/cloud_storage_bucket/chunks
 
-EXPOSE 7860
+# Expose default port for Coolify / Docker
+EXPOSE 5000
 
-# Run with Gunicorn on port 7860
-CMD ["gunicorn", "-b", "0.0.0.0:7860", "--workers", "2", "--timeout", "120", "app:app"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:${PORT:-5000}/api/stats || exit 1
+
+# Start production WSGI server with dynamic port support
+CMD ["sh", "-c", "gunicorn -b 0.0.0.0:${PORT:-5000} --workers 2 --timeout 120 app:app"]

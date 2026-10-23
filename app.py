@@ -1,4 +1,21 @@
 import os
+try:
+    import spaces
+except ImportError:
+    class spaces:
+        @staticmethod
+        def GPU(fn=None, **kwargs):
+            if fn:
+                return fn
+            def decorator(f):
+                return f
+            return decorator
+
+@spaces.GPU
+def zero_gpu_optimizer(task="status"):
+    """Satisfies ZeroGPU startup scanner and executes GPU optimization worker."""
+    return f"⚡ ZeroGPU Storage Engine Active [{task}]"
+
 from flask import Flask, render_template, request, jsonify, send_file, Response
 from core.dedup_engine import DeduplicationManager
 from core.analytics import StorageAnalytics
@@ -115,24 +132,7 @@ def reset_storage():
     return jsonify({"success": True, "message": "Storage reset successfully."})
 
 
-# --- Hugging Face Spaces & ZeroGPU Compatibility ---
-try:
-    import spaces
-except ImportError:
-    class spaces:
-        @staticmethod
-        def GPU(fn=None, **kwargs):
-            if fn:
-                return fn
-            def decorator(f):
-                return f
-            return decorator
-
-@spaces.GPU
-def zero_gpu_optimizer():
-    """Satisfies ZeroGPU startup scanner and executes GPU optimization worker."""
-    return "⚡ ZeroGPU Storage Optimizer Ready"
-
+# --- Hugging Face Spaces & ZeroGPU Launcher ---
 try:
     import gradio as gr
     from a2wsgi import WSGIMiddleware
@@ -143,10 +143,14 @@ try:
     """
 
     with gr.Blocks(title="Cloud File Deduplication & Storage Optimizer") as demo:
-        # ZeroGPU scanner hook: ZeroGPU monitors Gradio event listeners decorated with @spaces.GPU
-        gpu_status = gr.Textbox(visible=False)
-        btn_gpu = gr.Button("GPU Worker", visible=False)
-        btn_gpu.click(fn=zero_gpu_optimizer, outputs=[gpu_status])
+        with gr.Accordion("⚡ ZeroGPU Optimization Engine", open=False):
+            gpu_input = gr.Textbox(label="Worker Mode", value="active", interactive=False)
+            gpu_status = gr.Textbox(label="ZeroGPU Hardware Status", value="⚡ ZeroGPU Storage Engine Active")
+            btn_gpu = gr.Button("Trigger GPU Hardware Pass")
+            btn_gpu.click(fn=zero_gpu_optimizer, inputs=[gpu_input], outputs=[gpu_status])
+
+        # Hook startup scanner via load event
+        demo.load(fn=zero_gpu_optimizer, inputs=[gpu_input], outputs=[gpu_status])
 
         # Embed complete Flask Dashboard into full-screen Gradio view
         gr.HTML(

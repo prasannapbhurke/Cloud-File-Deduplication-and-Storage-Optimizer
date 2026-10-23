@@ -1,0 +1,28 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.env
+
+# Cloud Storage & Database Chunks
+cloud_storage_bucket/
+*.db
+*.log
+
+# OS & IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+~$*
+
+# Local test uploads & buckets
+*.pdf
+test_storage_bucket/
+

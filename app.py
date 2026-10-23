@@ -159,17 +159,20 @@ try:
 
     # Mount Flask app to Gradio's internal ASGI application
     demo.app.mount("/flask", WSGIMiddleware(app))
+
+    # If running on Hugging Face Spaces, launch demo immediately during startup
+    if is_hf:
+        port = int(os.environ.get("PORT", 7860))
+        print(f"[*] Starting Gradio & ZeroGPU on port {port} for Hugging Face Spaces...")
+        demo.launch(server_name="0.0.0.0", server_port=port, show_api=False)
 except Exception as err:
     demo = None
     print(f"[!] Warning: Gradio/ASGI initialization notice: {err}")
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 7860 if is_hf else 5000))
-    if is_hf and demo:
-        print(f"[*] Starting Gradio & ZeroGPU on port {port} for Hugging Face Spaces...")
-        demo.launch(server_name="0.0.0.0", server_port=port, show_api=False)
-    else:
+    if not is_hf:
+        port = int(os.environ.get("PORT", 5000))
         print(f"[*] Cloud File Deduplication & Storage Optimizer started on http://127.0.0.1:{port}")
         app.run(host="0.0.0.0", port=port, debug=False)
 

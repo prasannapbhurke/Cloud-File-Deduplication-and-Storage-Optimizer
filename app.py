@@ -36,6 +36,22 @@ from core.supabase_storage import SupabaseStorageAdapter
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500 MB upload limit
 
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS":
+        res = Response()
+        res.headers['Access-Control-Allow-Origin'] = '*'
+        res.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+        res.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return res
+
+@app.after_request
+def add_cors_headers(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+    return response
+
 data_dir = os.environ.get("DATA_DIR", ".")
 os.makedirs(data_dir, exist_ok=True)
 bucket_dir = os.path.join(data_dir, "cloud_storage_bucket")

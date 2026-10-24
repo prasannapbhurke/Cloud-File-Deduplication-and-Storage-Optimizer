@@ -1,27 +1,18 @@
-import sqlite3
 import os
-from contextlib import contextmanager
-from typing import Dict, Any, Generator
+from typing import Dict, Any, Optional
+from core.db import DatabaseManager
 
 
 class StorageAnalytics:
     """
     Storage Analytics & Space Optimization Module.
     Calculates live metrics, deduplication efficiency ratios, and physical space savings.
+    Supports both Supabase PostgreSQL and local SQLite.
     """
 
-    def __init__(self, db_path: str = "metadata_catalog.db"):
+    def __init__(self, db_path: str = "metadata_catalog.db", db_url: Optional[str] = None):
         self.db_path = os.path.abspath(db_path)
-
-    @contextmanager
-    def _get_conn(self) -> Generator[sqlite3.Connection, None, None]:
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        try:
-            with conn:
-                yield conn
-        finally:
-            conn.close()
+        self.db_manager = DatabaseManager(self.db_path, db_url=db_url)
 
     @staticmethod
     def format_bytes(num_bytes: int) -> str:
@@ -46,30 +37,30 @@ class StorageAnalytics:
         - Deduplication Efficiency Ratio
         - Percentage Reduction
         """
-        with self._get_conn() as conn:
-            cursor = conn.cursor()
-            
+        with self.db_manager.get_conn() as conn:
+            cursor = self.db_manager.get_cursor(conn)
+
             # Count total uploaded user files and sum logical sizes
             cursor.execute("""
                 SELECT COUNT(*) AS total_files,
                        COALESCE(SUM(file_size), 0) AS total_logical,
                        COALESCE(SUM(total_chunks), 0) AS total_logical_chunks,
-                       COALESCE(SUM(CASE WHEN is_deduplicated = 1 AND dedup_chunks = 0 THEN total_chunks ELSE dedup_chunks END), 0) AS total_dedup_chunks,
-                       SUM(CASE WHEN is_deduplicated = 1 THEN 1 ELSE 0 END) AS duplicate_files
+                       COALESCE(SUM(CASE WHEN (is_deduplicated = 1 OR is_deduplicated = TRUE) AND dedup_chunks = 0 THEN total_chunks ELSE dedup_chunks END), 0) AS total_dedup_chunks,
+                       SUM(CASE WHEN (is_deduplicated = 1 OR is_deduplicated = TRUE) THEN 1 ELSE 0 END) AS duplicate_files
                 FROM user_files
             """)
             user_stats = cursor.fetchone()
-            total_files = user_stats["total_files"]
-            total_logical_bytes = user_stats["total_logical"]
-            total_logical_chunks = user_stats["total_logical_chunks"]
-            total_dedup_chunks = user_stats["total_dedup_chunks"]
-            duplicate_files = user_stats["duplicate_files"] or 0
+            total_files = user_stats["total_files"] if user_stats else 0
+            total_logical_bytes = user_stats["total_logical"] if user_stats else 0
+            total_logical_chunks = user_stats["total_logical_chunks"] if user_stats else 0
+            total_dedup_chunks = user_stats["total_dedup_chunks"] if user_stats else 0
+            duplicate_files = (user_stats["duplicate_files"] if user_stats else 0) or 0
 
             # Count unique chunks stored and sum physical sizes
             cursor.execute("SELECT COUNT(*) AS unique_chunks, COALESCE(SUM(size_bytes), 0) AS total_physical FROM chunks")
             chunk_stats = cursor.fetchone()
-            unique_chunks = chunk_stats["unique_chunks"]
-            total_physical_bytes = chunk_stats["total_physical"]
+            unique_chunks = chunk_stats["unique_chunks"] if chunk_stats else 0
+            total_physical_bytes = chunk_stats["total_physical"] if chunk_stats else 0
 
             # Space saved calculation
             space_saved_bytes = max(0, total_logical_bytes - total_physical_bytes)

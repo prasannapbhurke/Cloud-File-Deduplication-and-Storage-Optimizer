@@ -20,6 +20,7 @@ from flask import Flask, render_template, request, jsonify, send_file, Response
 from core.dedup_engine import DeduplicationManager
 from core.analytics import StorageAnalytics
 from core.cloud_storage import CloudStorageAdapter
+from core.supabase_storage import SupabaseStorageAdapter
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500 MB upload limit
@@ -29,10 +30,23 @@ os.makedirs(data_dir, exist_ok=True)
 bucket_dir = os.path.join(data_dir, "cloud_storage_bucket")
 db_path = os.path.join(data_dir, "metadata_catalog.db")
 
-# Initialize Cloud Storage & Deduplication Engine
-storage_adapter = CloudStorageAdapter(bucket_dir=bucket_dir)
-dedup_manager = DeduplicationManager(db_path=db_path, storage_adapter=storage_adapter)
-analytics = StorageAnalytics(db_path=db_path)
+# Detect Supabase Configuration
+supabase_url = os.environ.get("SUPABASE_URL")
+supabase_key = os.environ.get("SUPABASE_KEY") or os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+database_url = os.environ.get("DATABASE_URL") or os.environ.get("SUPABASE_DB_URL")
+
+if supabase_url and supabase_key:
+    print("☁️ [Supabase Active] Storing chunks in Supabase Cloud Object Storage...")
+    storage_adapter = SupabaseStorageAdapter(supabase_url=supabase_url, supabase_key=supabase_key)
+else:
+    storage_adapter = CloudStorageAdapter(bucket_dir=bucket_dir)
+
+if database_url:
+    print("🐘 [Supabase Active] Connecting to Supabase Cloud PostgreSQL database...")
+
+# Initialize Deduplication Engine & Analytics
+dedup_manager = DeduplicationManager(db_path=db_path, db_url=database_url, storage_adapter=storage_adapter)
+analytics = StorageAnalytics(db_path=db_path, db_url=database_url)
 
 is_hf = bool(os.environ.get("SYSTEM") == "spaces" or os.environ.get("SPACE_ID"))
 

@@ -7,6 +7,9 @@ verify storage bucket access, and test end-to-end cloud deduplication.
 import os
 import sys
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
 def prompt_env(key, description, default=""):
     val = os.environ.get(key)
     if not val:

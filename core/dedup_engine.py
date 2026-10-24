@@ -247,7 +247,7 @@ class DeduplicationManager:
                             filename, user_name, file_size, chunk_hash, file_hash,
                             total_chunks, dedup_chunks, new_chunks,
                             upload_timestamp, is_deduplicated
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, TRUE)
                     """, (filename, user_name, file_size, file_hash, file_hash, total_chunks, total_chunks, 0, now_str))
                 else:
                     cursor.execute("""
@@ -255,7 +255,7 @@ class DeduplicationManager:
                             filename, user_name, file_size, file_hash,
                             total_chunks, dedup_chunks, new_chunks,
                             upload_timestamp, is_deduplicated
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, TRUE)
                     """, (filename, user_name, file_size, file_hash, total_chunks, total_chunks, 0, now_str))
                 new_file_id = cursor.lastrowid
 
@@ -381,7 +381,7 @@ class DeduplicationManager:
                 """, (
                     filename, user_name, file_size, file_hash, file_hash,
                     total_chunks, dedup_chunks_count, new_chunks_count,
-                    now_str, 1 if dedup_chunks_count > 0 else 0
+                    now_str, bool(dedup_chunks_count > 0)
                 ))
             else:
                 cursor.execute("""
@@ -394,7 +394,7 @@ class DeduplicationManager:
                 """, (
                     filename, user_name, file_size, file_hash,
                     total_chunks, dedup_chunks_count, new_chunks_count,
-                    now_str, 1 if dedup_chunks_count > 0 else 0
+                    now_str, bool(dedup_chunks_count > 0)
                 ))
             file_id = cursor.lastrowid
 

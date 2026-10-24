@@ -1,4 +1,15 @@
 import os
+
+# Automatically load .env file if present
+env_file = os.path.join(os.path.dirname(__file__), ".env")
+if os.path.isfile(env_file):
+    with open(env_file, "r") as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                k, v = line.split("=", 1)
+                os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+
 try:
     import spaces
 except ImportError:
@@ -36,13 +47,13 @@ supabase_key = os.environ.get("SUPABASE_KEY") or os.environ.get("SUPABASE_SERVIC
 database_url = os.environ.get("DATABASE_URL") or os.environ.get("SUPABASE_DB_URL")
 
 if supabase_url and supabase_key:
-    print("☁️ [Supabase Active] Storing chunks in Supabase Cloud Object Storage...")
+    print("[SUPABASE ACTIVE] Storing chunks in Supabase Cloud Object Storage...")
     storage_adapter = SupabaseStorageAdapter(supabase_url=supabase_url, supabase_key=supabase_key)
 else:
     storage_adapter = CloudStorageAdapter(bucket_dir=bucket_dir)
 
 if database_url:
-    print("🐘 [Supabase Active] Connecting to Supabase Cloud PostgreSQL database...")
+    print("[SUPABASE ACTIVE] Connecting to Supabase Cloud PostgreSQL database...")
 
 # Initialize Deduplication Engine & Analytics
 dedup_manager = DeduplicationManager(db_path=db_path, db_url=database_url, storage_adapter=storage_adapter)

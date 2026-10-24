@@ -77,24 +77,31 @@ class DatabaseManager:
     @contextmanager
     def get_conn(self) -> Generator[Any, None, None]:
         if self.is_postgres:
-            conn = psycopg2.connect(self.db_url, cursor_factory=psycopg2.extras.RealDictCursor)
             try:
-                yield conn
-                conn.commit()
-            except Exception:
-                conn.rollback()
-                raise
-            finally:
-                conn.close()
-        else:
-            conn = sqlite3.connect(self.db_path)
-            conn.row_factory = sqlite3.Row
-            conn.execute("PRAGMA foreign_keys = ON")
-            try:
-                with conn:
+                conn = psycopg2.connect(self.db_url, cursor_factory=psycopg2.extras.RealDictCursor)
+                try:
                     yield conn
-            finally:
-                conn.close()
+                    conn.commit()
+                except Exception:
+                    conn.rollback()
+                    raise
+                finally:
+                    conn.close()
+                return
+            except Exception as e:
+                print(f"[!] Warning: PostgreSQL connection failed ({e}). Falling back to local SQLite.")
+                self.is_postgres = False
+
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON")
+        try:
+            with conn:
+                yield conn
+        finally:
+            conn.close()
 
     def get_cursor(self, conn) -> CursorAdapter:
-        return CursorAdapter(conn.cursor(), is_postgres=self.is_postgres)
+        is_pg = not isinstance(conn, sqlite3.Connection)
+        return CursorAdapter(conn.cursor(), is_postgres=is_pg)
+

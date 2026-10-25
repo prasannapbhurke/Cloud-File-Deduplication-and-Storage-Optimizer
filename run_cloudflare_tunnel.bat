@@ -1,4 +1,5 @@
 @echo off
+cd /d "%~dp0"
 title Cloudflare Quick Tunnel - Cloud File Deduplication
 echo ====================================================================
 echo   LAUNCHING CLOUDFLARE QUICK TUNNEL (DIRECT HTTPS - NO PASSWORD)

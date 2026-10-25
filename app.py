@@ -52,7 +52,8 @@ def add_cors_headers(response):
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
     return response
 
-data_dir = os.environ.get("DATA_DIR", ".")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+data_dir = os.environ.get("DATA_DIR", BASE_DIR)
 os.makedirs(data_dir, exist_ok=True)
 bucket_dir = os.path.join(data_dir, "cloud_storage_bucket")
 db_path = os.path.join(data_dir, "metadata_catalog.db")
@@ -73,7 +74,7 @@ if database_url:
 
 # Initialize Deduplication Engine & Analytics
 dedup_manager = DeduplicationManager(db_path=db_path, db_url=database_url, storage_adapter=storage_adapter)
-analytics = StorageAnalytics(db_path=db_path, db_url=database_url)
+analytics = StorageAnalytics(db_path=db_path, db_url=database_url, db_manager=dedup_manager.db_manager)
 
 is_hf = bool(os.environ.get("SYSTEM") == "spaces" or os.environ.get("SPACE_ID"))
 

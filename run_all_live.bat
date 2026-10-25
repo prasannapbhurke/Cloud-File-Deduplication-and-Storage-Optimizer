@@ -1,4 +1,5 @@
 @echo off
+cd /d "%~dp0"
 title Cloud File Deduplication - Complete Live Launcher
 echo ====================================================================
 echo   LAUNCHING APP ^& CLOUDFLARE LIVE TUNNEL

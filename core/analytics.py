@@ -10,9 +10,9 @@ class StorageAnalytics:
     Supports both Supabase PostgreSQL and local SQLite.
     """
 
-    def __init__(self, db_path: str = "metadata_catalog.db", db_url: Optional[str] = None):
+    def __init__(self, db_path: str = "metadata_catalog.db", db_url: Optional[str] = None, db_manager: Optional[DatabaseManager] = None):
         self.db_path = os.path.abspath(db_path)
-        self.db_manager = DatabaseManager(self.db_path, db_url=db_url)
+        self.db_manager = db_manager or DatabaseManager(self.db_path, db_url=db_url)
 
     @staticmethod
     def format_bytes(num_bytes: int) -> str:

@@ -1,4 +1,5 @@
 @echo off
+cd /d "%~dp0"
 title Cloud File Deduplication and Storage Optimizer
 echo ================================================================
 echo   Launching Cloud File Deduplication and Storage Optimizer

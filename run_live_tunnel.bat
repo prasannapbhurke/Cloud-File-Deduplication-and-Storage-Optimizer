@@ -1,4 +1,5 @@
 @echo off
+cd /d "%~dp0"
 title Live Public Tunnel - Cloud File Deduplication
 echo ====================================================================
 echo   CREATING LIVE PUBLIC INTERNET LINK (LOCALTUNNEL)

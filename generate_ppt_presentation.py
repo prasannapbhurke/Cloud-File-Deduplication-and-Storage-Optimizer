@@ -93,15 +93,77 @@ def create_deck(filename="Cloud_File_Deduplication_Presentation.pptx"):
     p_sub1.font.color.rgb = C_EMERALD
 
     # Presenter Card
-    pres_box = s1.shapes.add_textbox(Inches(0.8), Inches(5.8), Inches(11.5), Inches(1.0))
+    pres_box = s1.shapes.add_textbox(Inches(0.8), Inches(5.6), Inches(11.5), Inches(1.2))
     tf_pres = pres_box.text_frame
     p_pres = tf_pres.paragraphs[0]
-    p_pres.text = "Presented by: Prasanna Bhurke | Full-Stack Cloud Engineering Project"
-    p_pres.font.size = Pt(13)
-    p_pres.font.color.rgb = C_MUTED
+    p_pres.text = "D. Y. Patil College of Engineering & Technology, Kolhapur | Dept. of CSE | Batch T6"
+    p_pres.font.size = Pt(14)
+    p_pres.font.bold = True
+    p_pres.font.color.rgb = C_WHITE
+
+    p_guide = tf_pres.add_paragraph()
+    p_guide.text = "Team: Roll 144, 149, 151, 152, 155 | Project Guide: Mrs. Aditee A. Salokhe | HOD: Dr. R. J. Dhanal"
+    p_guide.font.size = Pt(12)
+    p_guide.font.color.rgb = C_MUTED
+    p_guide.space_before = Pt(4)
 
     # =========================================================================
-    # SLIDE 2: The Real-World Problem (Human Story)
+    # SLIDE 2: Academic Credentials & Project Team
+    # =========================================================================
+    s_team = prs.slides.add_slide(blank_layout)
+    add_background(s_team, C_WHITE)
+    add_header(s_team, "Academic Project Team & Module Responsibilities", category="ACADEMIC CREDENTIALS — BATCH T6")
+
+    team_members = [
+        ("Roll 155", "Prasanna Pradeep Bhurke", "Cloud Backend Architecture, Supabase PostgreSQL, S3 Storage & Live Tunneling", C_INDIGO),
+        ("Roll 144", "Sarthak Sanjay Salokhe", "Block Hashing Engine (SHA-256), Deduplication Verification & Collision Prevention", C_EMERALD),
+        ("Roll 149", "Vyanktesh H. Madhyapgol", "Interactive Glassmorphism UI/UX, Drag-and-Drop Zone & Visual Chunk Map", C_NAVY),
+        ("Roll 151", "Manjunath Rajkumar Gavandi", "Storage Analytics Engine, Efficiency Ratio Calculation & Space Savings Logs", C_INDIGO),
+        ("Roll 152", "Balaji Ramraje Gaikwad", "Automated Test Suite, Byte-for-Byte File Reconstruction & Parity Streaming", C_EMERALD),
+        ("Faculty Mentorship", "Mrs. Aditee A. Salokhe (Guide)", "Head of Dept: Dr. R. J. Dhanal | Dept. of Computer Science & Engineering, DYPCET", C_NAVY),
+    ]
+
+    grid_w = Inches(3.64)
+    grid_gap = Inches(0.4)
+    grid_start_x = Inches(0.8)
+
+    for i, (roll, name, role, accent_c) in enumerate(team_members):
+        col = i % 3
+        row = i // 3
+        cx = grid_start_x + col * (grid_w + grid_gap)
+        cy = Inches(1.8) if row == 0 else Inches(4.5)
+        ch = Inches(2.3)
+
+        card = s_team.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, cx, cy, grid_w, ch)
+        card.fill.solid()
+        card.fill.fore_color.rgb = C_CARD_BG
+        card.line.color.rgb = RGBColor(226, 232, 240)
+
+        tb = s_team.shapes.add_textbox(cx + Inches(0.2), cy + Inches(0.2), grid_w - Inches(0.4), ch - Inches(0.4))
+        tf = tb.text_frame
+        tf.word_wrap = True
+
+        p_r = tf.paragraphs[0]
+        p_r.text = roll.upper()
+        p_r.font.size = Pt(11)
+        p_r.font.bold = True
+        p_r.font.color.rgb = accent_c
+        p_r.space_after = Pt(2)
+
+        p_n = tf.add_paragraph()
+        p_n.text = name
+        p_n.font.size = Pt(14)
+        p_n.font.bold = True
+        p_n.font.color.rgb = C_NAVY
+        p_n.space_after = Pt(6)
+
+        p_d = tf.add_paragraph()
+        p_d.text = role
+        p_d.font.size = Pt(10)
+        p_d.font.color.rgb = RGBColor(71, 85, 105)
+
+    # =========================================================================
+    # SLIDE 3: The Real-World Problem (Human Story)
     # =========================================================================
     s2 = prs.slides.add_slide(blank_layout)
     add_background(s2, C_WHITE)

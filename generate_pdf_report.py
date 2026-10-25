@@ -45,7 +45,7 @@ class NumberedCanvas(canvas.Canvas):
         # Draw footer
         footer_text = f"Page {self._pageNumber} of {page_count}"
         self.drawRightString(letter[0] - 54, 36, footer_text)
-        self.drawString(54, 36, "Confidential & Academic — Prasanna Bhurke")
+        self.drawString(54, 36, "D. Y. Patil College of Engineering & Technology, Kolhapur | Batch T6")
         self.setStrokeColor(colors.HexColor("#CBD5E1"))
         self.setLineWidth(0.5)
         self.line(54, 48, letter[0] - 54, 48)
@@ -146,35 +146,85 @@ def build_pdf(filename="Cloud_File_Deduplication_Documentation.pdf"):
 
     # Title & Header
     story.append(Paragraph("Cloud File Deduplication & Storage Optimizer", title_style))
-    story.append(Paragraph("Comprehensive Technical Documentation: Frontend, Backend, Database & Cloud Architecture", subtitle_style))
+    story.append(Paragraph("D. Y. Patil College of Engineering & Technology, Kolhapur | Department of CSE | Batch T6 (2026-27)", subtitle_style))
     story.append(HRFlowable(width="100%", thickness=1.5, color=accent_color, spaceBefore=0, spaceAfter=14))
 
     # Meta Info Card
     meta_data = [
         [
-            Paragraph("<b>Author / Developer:</b> Prasanna Bhurke", body_style),
-            Paragraph("<b>Architecture:</b> Cloud Microservices & Chunk Dedup", body_style)
+            Paragraph("<b>Institution:</b> D. Y. Patil College of Engg. & Tech., Kolhapur", body_style),
+            Paragraph("<b>Course:</b> Cloud Computing (CC) Laboratory", body_style)
         ],
         [
-            Paragraph("<b>Live Frontend:</b> Netlify (CDN Static SPA)", body_style),
-            Paragraph("<b>Live Backend:</b> Render / Gunicorn / Flask", body_style)
+            Paragraph("<b>Department:</b> Computer Science & Engineering", body_style),
+            Paragraph("<b>Batch / Academic Year:</b> Batch T6 (2026 – 2027)", body_style)
         ],
         [
-            Paragraph("<b>Database:</b> Supabase PostgreSQL (IPv4 Pooler)", body_style),
-            Paragraph("<b>Object Storage:</b> Supabase S3-Compatible Storage", body_style)
+            Paragraph("<b>Project Guide:</b> Mrs. Aditee A. Salokhe", body_style),
+            Paragraph("<b>Head of Department:</b> Dr. R. J. Dhanal", body_style)
+        ],
+        [
+            Paragraph("<b>Live Stack:</b> Netlify (Frontend) | Render (Backend)", body_style),
+            Paragraph("<b>Database & Storage:</b> Supabase PostgreSQL + S3 Storage", body_style)
         ]
     ]
-    meta_table = Table(meta_data, colWidths=[240, 264])
+    meta_table = Table(meta_data, colWidths=[250, 254])
     meta_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), card_bg),
         ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor("#CBD5E1")),
         ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#E2E8F0")),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
         ('LEFTPADDING', (0, 0), (-1, -1), 10),
         ('RIGHTPADDING', (0, 0), (-1, -1), 10),
     ]))
     story.append(meta_table)
+    story.append(Spacer(1, 10))
+
+    # Team Members Table
+    team_data = [
+        [
+            Paragraph("<b>Roll No.</b>", body_style),
+            Paragraph("<b>Student Name (T.Y. CSE - Div C)</b>", body_style),
+            Paragraph("<b>Project Module & Responsibility</b>", body_style)
+        ],
+        [
+            Paragraph("<b>155</b>", body_style),
+            Paragraph("Prasanna Pradeep Bhurke", body_style),
+            Paragraph("Cloud Backend Architecture, Supabase DB & Storage Integration, Live Tunnels", body_style)
+        ],
+        [
+            Paragraph("<b>144</b>", body_style),
+            Paragraph("Sarthak Sanjay Salokhe", body_style),
+            Paragraph("Block Hashing Engine (SHA-256), Deduplication Algorithms", body_style)
+        ],
+        [
+            Paragraph("<b>149</b>", body_style),
+            Paragraph("Vyanktesh Harishchandra Madhyapgol", body_style),
+            Paragraph("Frontend Glassmorphic UI & Visual Block Distribution Map", body_style)
+        ],
+        [
+            Paragraph("<b>151</b>", body_style),
+            Paragraph("Manjunath Rajkumar Gavandi", body_style),
+            Paragraph("Storage Analytics, Space Savings Calculator & Reporting", body_style)
+        ],
+        [
+            Paragraph("<b>152</b>", body_style),
+            Paragraph("Balaji Ramraje Gaikwad", body_style),
+            Paragraph("Testing Suite, File Reconstruction Pipeline & Validation", body_style)
+        ]
+    ]
+    team_table = Table(team_data, colWidths=[60, 180, 264])
+    team_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#E2E8F0")),
+        ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor("#CBD5E1")),
+        ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#E2E8F0")),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('LEFTPADDING', (0, 0), (-1, -1), 8),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+    ]))
+    story.append(team_table)
     story.append(Spacer(1, 14))
 
     # Section 1: Executive Overview

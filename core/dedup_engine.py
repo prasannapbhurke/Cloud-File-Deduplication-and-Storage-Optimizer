@@ -448,12 +448,19 @@ class DeduplicationManager:
 
                 # Check if this exact hash appeared in an earlier file
                 cursor.execute("""
-                    SELECT MIN(id) FROM user_files
+                    SELECT MIN(id) AS min_id FROM user_files
                     WHERE file_hash = ? AND id != ?
                 """, (target_hash, item["id"]))
                 earliest_match = cursor.fetchone()
 
-                if earliest_match and earliest_match[0] is not None and item["id"] > earliest_match[0]:
+                min_id = None
+                if earliest_match:
+                    if isinstance(earliest_match, dict) or hasattr(earliest_match, "get"):
+                        min_id = earliest_match.get("min_id") or earliest_match.get("min")
+                    else:
+                        min_id = earliest_match[0]
+
+                if min_id is not None and item["id"] > min_id:
                     item["is_deduplicated"] = 1
                     item["dedup_chunks"] = item["total_chunks"] if item["total_chunks"] > 0 else 1
 

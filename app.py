@@ -124,8 +124,13 @@ def get_stats():
 @app.route("/api/files", methods=["GET"])
 def list_files():
     """Returns the list of all registered files."""
-    files = dedup_manager.list_files()
-    return jsonify(files)
+    try:
+        files = dedup_manager.list_files()
+        return jsonify(files)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e), "status": "ERROR"}), 500
 
 
 @app.route("/api/file/<int:file_id>/chunks", methods=["GET"])
